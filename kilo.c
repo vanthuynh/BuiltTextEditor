@@ -28,7 +28,6 @@ void enableRawMode() {
 int main() {
     enableRawMode();
 
-    char c;
     // read() returns if it doesn't get any input for a certain amount of time
     while (1) {
         char c = '\0';
