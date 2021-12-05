@@ -13,7 +13,7 @@ void enableRawMode() {
     atexit(disableRawMode); // register disableRawMode() to be called automatically
 
     struct termios raw = orig_termios;
-    raw.c_lflag &= ~(ECHO);
+    raw.c_lflag &= ~(ECHO | ICANON); // ICANON flag that turn off canonical mode
 
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw);
 }
