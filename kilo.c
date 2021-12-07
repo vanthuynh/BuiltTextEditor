@@ -165,7 +165,6 @@ void editorUpdateRow(erow *row) {
 }
 
 void editorAppendRow(char *s, size_t len) {
-    // multiply number of bytes each erow takes by the number of rows we want
     E.row = realloc(E.row, sizeof(erow) * (E.numrows + 1));
 
     int at = E.numrows;
@@ -258,10 +257,10 @@ void editorDrawRows(struct abuf *ab) {
                 abAppend(ab, "~", 1);
             }
         } else {
-            int len = E.row[filerow].size - E.coloff;
+            int len = E.row[filerow].rsize - E.coloff;
             if (len < 0) len = 0;
             if (len > E.screencols) len = E.screencols;
-            abAppend(ab, &E.row[filerow].chars[E.coloff], len);
+            abAppend(ab, &E.row[filerow].render[E.coloff], len);
         }
         abAppend(ab, "\x1b[K", 3); // k command erases part of the current line
         if (y < E.screenrows - 1) {
