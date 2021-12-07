@@ -205,8 +205,8 @@ void abFree(struct abuf *ab) {
 void editorDrawRows(struct abuf *ab) {
     int y;
     for (y = 0; y < E.screenrows; y++) {
-        if (y >= E.numrows) {
-            // we wnt welcome message to only display when user starts the program with no arguments
+        int filerow = y + E.rowoff; // get the row of the file that we want to display at each y position
+        if (filerow >= E.numrows) {
             if (E.numrows == 0 && y == E.screenrows / 3) {
                 char welcome[80];
                 int welcomelen = snprintf(welcome, sizeof(welcome),
@@ -223,9 +223,9 @@ void editorDrawRows(struct abuf *ab) {
                 abAppend(ab, "~", 1);
             }
         } else {
-            int len = E.row[y].size;
+            int len = E.row[filerow].size;
             if (len > E.screencols) len = E.screencols;
-            abAppend(ab, E.row[y].chars, len);
+            abAppend(ab, E.row[filerow].chars, len);
         }
         abAppend(ab, "\x1b[K", 3); // k command erases part of the current line
         if (y < E.screenrows - 1) {
@@ -308,7 +308,7 @@ void editorProcessKeypress() {
 void initEditor() {
     E.cx = 0;
     E.cy = 0;
-    E.rowoff = 0; // initialize to 0 means we'll be scrolled to top of the file by
+    E.rowoff = 0; // initialize to 0 means we'll be scrolled to top of the file by default
     E.numrows = 0;
     E.row = NULL;
     if (getWindowSize(&E.screenrows, &E.screencols) == -1) die("getWindowSize");
