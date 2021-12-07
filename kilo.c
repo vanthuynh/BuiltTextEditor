@@ -37,6 +37,7 @@ typedef struct erow {
 struct editorConfig {
     int cx, cy; // keep track of the cursor's x and y position in the global editor state
     int rowoff; // keep track of what row of file the user is currently scrolled to
+    int coloff; // keep track of what column of file the user is currently scrolled to (horizontally)
     int screenrows;
     int screencols;
     int numrows;
@@ -320,6 +321,7 @@ void initEditor() {
     E.cx = 0;
     E.cy = 0;
     E.rowoff = 0; // initialize to 0 means we'll be scrolled to top of the file by default
+    E.coloff = 0;
     E.numrows = 0;
     E.row = NULL;
     if (getWindowSize(&E.screenrows, &E.screencols) == -1) die("getWindowSize");
