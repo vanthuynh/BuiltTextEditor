@@ -294,6 +294,17 @@ void editorDrawRows(struct abuf *ab) {
         abAppend(ab, "\r\n", 2);
     }
 }
+
+void editorDrawStatusBar(struct abuf *ab) {
+    abAppend(ab, "\x1b[7m", 4);
+    int len = 0;
+    while (len < E.screencols) {
+        abAppend(ab, " ", 1);
+        len++;
+    }
+    abAppend(ab, "\x1b[m", 3); // m command cause the text printed after it to be printed with various possible attributes
+}
+
 void editorRefreshScreen() {
     editorScroll(); // call for adjusting rows inside visible window before refresh the screen
 
@@ -303,6 +314,7 @@ void editorRefreshScreen() {
     abAppend(&ab, "\x1b[H", 3);
 
     editorDrawRows(&ab);
+    editorDrawStatusBar(&ab);
 
     char buf[32];
     snprintf(buf, sizeof(buf), "\x1b[%d;%dH", (E.cy - E.rowoff) + 1,(E.rx - E.coloff) + 1);
