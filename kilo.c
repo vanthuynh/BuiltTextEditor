@@ -11,6 +11,7 @@
 #include <sys/ioctl.h>
 #include <sys/types.h>
 #include <termios.h>
+#include <time.h>
 #include <unistd.h>
 
 /***  defines ***/
@@ -48,6 +49,8 @@ struct editorConfig {
     int numrows;
     erow *row; // make erow an array of erow structs -> store multiple lines
     char *filename; // store the file name to be displayed
+    char statusmsg[80]; // store current message
+    time_t statusmsg_time; // store a timestamp for the message
     struct termios orig_termios;
 };
 struct editorConfig E;
@@ -424,6 +427,8 @@ void initEditor() {
     E.numrows = 0;
     E.row = NULL;
     E.filename = NULL;
+    E.statusmsg[0] = '\0';
+    E.statusmsg_time = 0;
 
     if (getWindowSize(&E.screenrows, &E.screencols) == -1) die("getWindowSize");
     E.screenrows -= 1;
