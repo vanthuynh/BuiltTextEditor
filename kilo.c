@@ -1,4 +1,8 @@
 /***  includes ***/
+#define _DEFAULT_SOURCE
+#define _BSD_SOURCE
+#define _GNU_SOURCE
+
 #include <ctype.h>
 #include <errno.h>
 #include <stdio.h>
@@ -188,8 +192,9 @@ void abFree(struct abuf *ab) {
 void editorDrawRows(struct abuf *ab) {
     int y;
     for (y = 0; y < E.screenrows; y++) {
-        if (y >= E.numrows)
-            if (y == E.screenrows / 3) {
+        if (y >= E.numrows) {
+            // we wnt welcome message to only display when user starts the program with no arguments
+            if (E.numrows == 0 && y == E.screenrows / 3) {
                 char welcome[80];
                 int welcomelen = snprintf(welcome, sizeof(welcome),
                     "Kilo editor -- version %s", KILO_VERSION);
