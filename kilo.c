@@ -170,9 +170,12 @@ void editorOpen(char *filename) {
     ssize_t linelen;
     linelen = getline(&line, &linecap, fp);
     if (linelen != -1) {
-        while (linelen > 0 && (line[linelen - 1] == '\n' || line[linelen - 1] == '\r'))
-            linelen--;
-        editorAppendRow(line, linelen);
+        // add this while loop to read an entire file into E.row
+        while ((linelen = getline(&line, &linecap, fp)) != -1) {
+            while (linelen > 0 && (line[linelen - 1] == '\n' || line[linelen - 1] == '\r'))
+                linelen--;
+            editorAppendRow(line, linelen);
+        }
     }
     free(line);
     fclose(fp);
