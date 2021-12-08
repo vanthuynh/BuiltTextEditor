@@ -503,7 +503,11 @@ char *editorPrompt(char *prompt) {
         editorSetStatusMessage(prompt, buf);
         editorRefreshScreen();
         int c = editorReadKey();
-        if (c == '\r') {
+        if (c == '\x1b') {
+            editorSetStatusMessage("");
+            free(buf);
+            return NULL;
+        } else if (c == '\r') {
             if (buflen != 0) {
                 editorSetStatusMessage("");
                 return buf;
