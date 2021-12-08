@@ -208,7 +208,7 @@ void editorAppendRow(char *s, size_t len) {
     E.numrows++;
 }
 
-
+// editorInsertChar doesn't have to worry about the details of modifying an erow
 void editorRowInsertChar(erow *row, int at, int c) {
     if (at < 0 || at > row->size) at = row->size; // validate at - index that will be inserted a character
     row->chars = realloc(row->chars, row->size + 2);
@@ -220,8 +220,8 @@ void editorRowInsertChar(erow *row, int at, int c) {
 
 
 /*** editor operations ***/
-void editorInsertChar(int c) {
-    if (E.cy == E.numrows) {
+void editorInsertChar(int c) { // this function doesn't have to worry about where the cursor is
+    if (E.cy == E.numrows) { // this means the cursor is on the tilde line after the end of the file
         editorAppendRow("", 0);
     }
     editorRowInsertChar(&E.row[E.cy], E.cx, c);
@@ -454,6 +454,10 @@ void editorProcessKeypress() {
         case ARROW_LEFT:
         case ARROW_RIGHT:
             editorMoveCursor(c);
+            break;
+
+        default:
+            editorInsertChar(c);
             break;
     }
 }
