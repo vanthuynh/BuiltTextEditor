@@ -50,6 +50,7 @@ struct editorConfig {
     int screencols;
     int numrows;
     erow *row; // make erow an array of erow structs -> store multiple lines
+    int dirty; // a text buffer is dirty if it has been modified since openning or saving the file
     char *filename; // store the file name to be displayed
     char statusmsg[80]; // store current message
     time_t statusmsg_time; // store a timestamp for the message
@@ -526,6 +527,7 @@ void initEditor() {
     E.coloff = 0;
     E.numrows = 0;
     E.row = NULL;
+    E.dirty = 0;
     E.filename = NULL;
     E.statusmsg[0] = '\0';
     E.statusmsg_time = 0;
