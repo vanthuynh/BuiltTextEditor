@@ -215,13 +215,20 @@ void editorAppendRow(char *s, size_t len) {
     E.dirty++;
 }
 
-// editorInsertChar doesn't have to worry about the details of modifying an erow
 void editorRowInsertChar(erow *row, int at, int c) {
     if (at < 0 || at > row->size) at = row->size; // validate at - index that will be inserted a character
     row->chars = realloc(row->chars, row->size + 2);
     memmove(&row->chars[at + 1], &row->chars[at], row->size - at + 1); // memove() = memcpy()
     row->size++;
     row->chars[at] = c;
+    editorUpdateRow(row);
+    E.dirty++;
+}
+
+void editorRowDelChar(erow *row, int at) {
+    if (at < 0 || at >= row->size) return;
+    memmove(&row->chars[at], &row->chars[at + 1], row->size - at);
+    row->size--;
     editorUpdateRow(row);
     E.dirty++;
 }
