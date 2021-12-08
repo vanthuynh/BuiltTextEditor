@@ -204,7 +204,7 @@ void editorInsertRow(int at, char *s, size_t len) {
 
     E.row = realloc(E.row, sizeof(erow) * (E.numrows + 1));
     memmove(&E.row[at + 1], &E.row[at], sizeof(erow) * (E.numrows - at));
-    
+
     E.row[at].size = len;
     E.row[at].chars = malloc(len + 1);
     memcpy(E.row[at].chars, s, len);
@@ -261,7 +261,7 @@ void editorRowDelChar(erow *row, int at) {
 /*** editor operations ***/
 void editorInsertChar(int c) { // this function doesn't have to worry about where the cursor is
     if (E.cy == E.numrows) { // this means the cursor is on the tilde line after the end of the file
-        editorAppendRow("", 0);
+        editorInsertRow(E.numrows, "", 0);
     }
     editorRowInsertChar(&E.row[E.cy], E.cx, c);
     E.cx++;
@@ -317,7 +317,7 @@ void editorOpen(char *filename) {
         while ((linelen = getline(&line, &linecap, fp)) != -1) {
             while (linelen > 0 && (line[linelen - 1] == '\n' || line[linelen - 1] == '\r'))
                 linelen--;
-            editorAppendRow(line, linelen);
+            editorInsertRow(E.numrows, line, linelen);
         }
     }
     free(line);
