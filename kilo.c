@@ -211,6 +211,7 @@ void editorAppendRow(char *s, size_t len) {
     editorUpdateRow(&E.row[at]);
 
     E.numrows++;
+    E.dirty++;
 }
 
 // editorInsertChar doesn't have to worry about the details of modifying an erow
@@ -221,6 +222,7 @@ void editorRowInsertChar(erow *row, int at, int c) {
     row->size++;
     row->chars[at] = c;
     editorUpdateRow(row);
+    E.dirty++;
 }
 
 
