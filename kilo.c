@@ -533,7 +533,7 @@ void editorProcessKeypress() {
     int c = editorReadKey();
     switch (c) {
         case '\r': // this is enter key
-            /* TODO */
+            editorInsertNewline();
             break;
         case CTRL_KEY('q'):
             // require user to press Ctrl-Q 3 times before quitting
