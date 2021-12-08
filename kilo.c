@@ -62,6 +62,7 @@ struct editorConfig E;
 /*** prototypes ***/
 void editorSetStatusMessage(const char *fmt, ...);
 void editorRefreshScreen();
+char *editorPrompt(char *prompt);
 
 /***  terminal ***/
 void die(const char *s) {
@@ -340,7 +341,9 @@ void editorOpen(char *filename) {
     E.dirty = 0;
 }
 void editorSave() {
-    if (E.filename == NULL) return;
+    if (E.filename == NULL) {
+        E.filename = editorPrompt("Save as: %s");
+    }
     int len;
     char *buf = editorRowsToString(&len); // write the string returned by editorRowsToString() to disk
     int fd = open(E.filename, O_RDWR | O_CREAT, 0644);
@@ -493,7 +496,7 @@ void editorSetStatusMessage(const char *fmt, ...) {
 /*** input ***/
 char *editorPrompt(char *prompt) {
     size_t bufsize = 128;
-    char *buf = malloc(bufsize);
+    char *buf = malloc(bufsize); // store user input
     size_t buflen = 0;
     buf[0] = '\0';
     while (1) {
@@ -506,12 +509,13 @@ char *editorPrompt(char *prompt) {
                 return buf;
             }
         } else if (!iscntrl(c) && c < 128) {
+            // double bufsize if buflen reach maximum
             if (buflen == bufsize - 1) {
                 bufsize *= 2;
                 buf = realloc(buf, bufsize);
             }
             buf[buflen++] = c;
-            buf[buflen] = '\0';
+            buf[buflen] = '\0'; // buf ends with a \0 character so that editorPrompt() know where the string ends
         }
     }
 }
