@@ -177,11 +177,13 @@ void editorUpdateSyntax(erow *row) {
     row->hl = realloc(row->hl, row->rsize); // realloc() the needed memory
     memset(row->hl, HL_NORMAL, row->rsize); // set all characters to HL_NORMAL by default
     
-    int i;
-    for (i = 0; i < row->rsize; i++) {
-        if (isdigit(row->render[i])) {
+    int i = 0;
+    while (i < row->rsize) {
+        char c = row->render[i];
+        if (isdigit(c)) {
             row->hl[i] = HL_NUMBER;
         }
+        i++;
     }
 }
 
@@ -413,7 +415,7 @@ void editorFindCallback(char *query, int key) {
     static int last_match = -1;
     static int direction = 1;
 
-    static int saved_hl_line;
+    static int saved_hl_line; // know which line's hl needs to be restored
     static char *saved_hl = NULL;
 
     if (saved_hl) {
