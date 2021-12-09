@@ -62,6 +62,7 @@ struct editorConfig E;
 void editorSetStatusMessage(const char *fmt, ...);
 void editorRefreshScreen();
 char *editorPrompt(char *prompt);
+char *editorPrompt(char *prompt, void (*callback)(char *, int));
 
 /***  terminal ***/
 void die(const char *s) {
@@ -528,7 +529,7 @@ void editorSetStatusMessage(const char *fmt, ...) {
 }
 
 /*** input ***/
-char *editorPrompt(char *prompt) {
+char *editorPrompt(char *prompt, void (*callback)(char *, int)) {
     size_t bufsize = 128;
     char *buf = malloc(bufsize); // store user input
     size_t buflen = 0;
@@ -541,11 +542,13 @@ char *editorPrompt(char *prompt) {
             if (buflen != 0) buf[--buflen] = '\0';
         } else if (c == '\x1b') {
             editorSetStatusMessage("");
+            if (callback) callback(buf, c);
             free(buf);
             return NULL;
         } else if (c == '\r') {
             if (buflen != 0) {
                 editorSetStatusMessage("");
+                if (callback) callback(buf, c);
                 return buf;
             }
         } else if (!iscntrl(c) && c < 128) {
@@ -557,6 +560,7 @@ char *editorPrompt(char *prompt) {
             buf[buflen++] = c;
             buf[buflen] = '\0'; // buf ends with a \0 character so that editorPrompt() know where the string ends
         }
+        if (callback) callback(buf, c);
     }
 }
 
