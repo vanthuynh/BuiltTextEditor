@@ -43,7 +43,7 @@ enum editorHighlight {
 /***  data ***/
 struct editorSyntax {
     char *filetype;
-    char **filematch;
+    char **filematch; // array of strings that contains a pattern to match a filename against
     int flags;
 };
 
@@ -68,9 +68,21 @@ struct editorConfig {
     char *filename; // store the file name to be displayed
     char statusmsg[80]; // store current message
     time_t statusmsg_time; // store a timestamp for the message
+    struct editorSyntax *syntax;
     struct termios orig_termios;
 };
 struct editorConfig E;
+
+/*** filetypes ***/
+char *C_HL_extensions[] = { ".c", ".h", ".cpp", NULL };
+struct editorSyntax HLDB[] = { // HLDB means highlight database
+    {
+        "c",
+        C_HL_extensions,
+        HL_HIGHLIGHT_NUMBERS
+    },
+};
+#define HLDB_ENTRIES (sizeof(HLDB) / sizeof(HLDB[0])) // HLDB_ENTRIES store length of HLDB array
 
 /*** prototypes ***/
 void editorSetStatusMessage(const char *fmt, ...);
@@ -807,6 +819,7 @@ void initEditor() {
     E.filename = NULL;
     E.statusmsg[0] = '\0';
     E.statusmsg_time = 0;
+    E.syntax = NULL;
 
     if (getWindowSize(&E.screenrows, &E.screencols) == -1) die("getWindowSize");
     E.screenrows -= 2;
