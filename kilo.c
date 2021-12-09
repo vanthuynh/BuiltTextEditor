@@ -33,12 +33,17 @@ enum editorKey {
     PAGE_UP,
     PAGE_DOWN
 };
+enum editorHighlight {
+    HL_NORMAL = 0,
+    HL_NUMBER
+};
 /***  data ***/
 typedef struct erow {
     int size;
     int rsize; // size of the contents of render
     char *chars;
     char *render; // contain actual characters to draw on the screen for that row of text
+    unsigned char *hl; // highlight
 } erow; // erow stands for "editor row"
 
 struct editorConfig {
@@ -225,6 +230,7 @@ void editorInsertRow(int at, char *s, size_t len) {
 
     E.row[at].rsize = 0;
     E.row[at].render = NULL;
+    E.row[at].hl = NULL;
     editorUpdateRow(&E.row[at]);
 
     E.numrows++;
@@ -234,6 +240,7 @@ void editorInsertRow(int at, char *s, size_t len) {
 void editorFreeRow(erow *row) {
     free(row->render);
     free(row->chars);
+    free(row->hl);
 }
 void editorDelRow(int at) {
     if (at < 0 || at >= E.numrows) return;
@@ -498,7 +505,17 @@ void editorDrawRows(struct abuf *ab) {
             int len = E.row[filerow].rsize - E.coloff;
             if (len < 0) len = 0;
             if (len > E.screencols) len = E.screencols;
-            abAppend(ab, &E.row[filerow].render[E.coloff], len);
+            char *c = &E.row[filerow].render[E.coloff];
+            int j;
+            for (j = 0; j < len; j++) {
+                if (isdigit(c[j])) {
+                    abAppend(ab, "\x1b[31m", 5); // set the text color to red using 31
+                    abAppend(ab, &c[j], 1);
+                    abAppend(ab, "\x1b[39m", 5); // reset to default color using 39
+                } else {
+                    abAppend(ab, &c[j], 1);
+                }
+            }
         }
         abAppend(ab, "\x1b[K", 3); // k command erases part of the current line
         abAppend(ab, "\r\n", 2);
