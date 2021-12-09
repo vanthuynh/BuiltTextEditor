@@ -173,8 +173,8 @@ int getWindowSize(int *rows, int *cols) {
 
 /*** syntax highlighting ***/
 void editorUpdateSyntax(erow *row) {
-    row->hl = realloc(row->hl, row->rsize);
-    memset(row->hl, HL_NORMAL, row->rsize);
+    row->hl = realloc(row->hl, row->rsize); // realloc() the needed memory
+    memset(row->hl, HL_NORMAL, row->rsize); // set all characters to HL_NORMAL by default
     
     int i;
     for (i = 0; i < row->rsize; i++) {
@@ -227,6 +227,7 @@ void editorUpdateRow(erow *row) {
     }
     row->render[idx] = '\0';
     row->rsize = idx;
+    editorUpdateSyntax(row);
 }
 
 
