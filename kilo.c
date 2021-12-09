@@ -61,7 +61,6 @@ struct editorConfig E;
 /*** prototypes ***/
 void editorSetStatusMessage(const char *fmt, ...);
 void editorRefreshScreen();
-char *editorPrompt(char *prompt);
 char *editorPrompt(char *prompt, void (*callback)(char *, int));
 
 /***  terminal ***/
@@ -380,10 +379,10 @@ void editorSave() {
 }
 
 /*** find ***/
-void editorFind() {
-    char *query = editorPrompt("Search: %s (ESC to cancel)", NULL);
-    if (query == NULL) return;
-
+void editorFindCallback(char *query, int key) {
+    if (key == '\r' || key == '\x1b') {
+        return;
+    }
     int i;
     for (i = 0; i < E.numrows; i++) {
         erow *row = &E.row[i];
@@ -395,7 +394,13 @@ void editorFind() {
             break;
         }
     }
-    free(query);
+}
+
+void editorFind() {
+    char *query = editorPrompt("Search: %s (ESC to cancel)", editorFindCallback);
+    if (query) {
+        free(query);
+    }
 }
 
 /*** append buffer ***/
