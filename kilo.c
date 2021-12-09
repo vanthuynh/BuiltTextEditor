@@ -173,6 +173,10 @@ int getWindowSize(int *rows, int *cols) {
 }
 
 /*** syntax highlighting ***/
+int is_separator(int c) {
+    return isspace(c) || c == '\0' || strchr(",.()+-/*=~%<>[];", c) != NULL;
+}
+
 void editorUpdateSyntax(erow *row) {
     row->hl = realloc(row->hl, row->rsize); // realloc() the needed memory
     memset(row->hl, HL_NORMAL, row->rsize); // set all characters to HL_NORMAL by default
