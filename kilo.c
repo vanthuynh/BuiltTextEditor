@@ -684,9 +684,14 @@ void editorDrawRows(struct abuf *ab) {
             for (j = 0; j < len; j++) {
                 if (iscntrl(c[j])) { // check if the current character is a control character
                     char sym = (c[j] <= 26) ? '@' + c[j] : '?'; // translate into printable character like @ or ?
-                    abAppend(ab, "\x1b[7m", 4);
-                    abAppend(ab, &sym, 1);
-                    abAppend(ab, "\x1b[m", 3);
+                    abAppend(ab, "\x1b[7m", 4); // switch to inverted colors
+                    abAppend(ab, &sym, 1);      
+                    abAppend(ab, "\x1b[m", 3);  // turn off inverted colors
+                    if (current_color != -1) {
+                        char buf[16];
+                        int clen = snprintf(buf, sizeof(buf), "\x1b[%dm", current_color);
+                        abAppend(ab, buf, clen);
+                    }
                 } else if (hl[j] == HL_NORMAL) {
                     if (current_color != -1) {
                         abAppend(ab, "\x1b[39m", 5);
