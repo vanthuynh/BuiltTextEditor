@@ -682,7 +682,12 @@ void editorDrawRows(struct abuf *ab) {
             int current_color = -1;
             int j;
             for (j = 0; j < len; j++) {
-                if (hl[j] == HL_NORMAL) {
+                if (iscntrl(c[j])) { // check if the current character is a control character
+                    char sym = (c[j] <= 26) ? '@' + c[j] : '?'; // translate into printable character like @ or ?
+                    abAppend(ab, "\x1b[7m", 4);
+                    abAppend(ab, &sym, 1);
+                    abAppend(ab, "\x1b[m", 3);
+                } else if (hl[j] == HL_NORMAL) {
                     if (current_color != -1) {
                         abAppend(ab, "\x1b[39m", 5);
                         current_color = -1;
