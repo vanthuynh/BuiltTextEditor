@@ -47,7 +47,7 @@ enum editorHighlight {
 struct editorSyntax {
     char *filetype;
     char **filematch; // array of strings that contains a pattern to match a filename against
-    char *singleline_comment_start;
+    char *singleline_comment_start; // set singleelien_comment_start to NULL if don't want comment highlight
     int flags;
 };
 
@@ -208,6 +208,9 @@ void editorUpdateSyntax(erow *row) {
     
     if (E.syntax == NULL) return;
 
+    char *scs = E.syntax->singleline_comment_start;
+    int scs_len = scs ? strlen(scs) : 0;
+
     int prev_sep = 1;
     int in_string = 0; // in_string keeps track whether we are currently inside a string
 
@@ -215,6 +218,13 @@ void editorUpdateSyntax(erow *row) {
     while (i < row->rsize) {
         char c = row->render[i];
         unsigned char prev_hl = (i > 0) ? row->hl[i - 1] : HL_NORMAL;
+
+        if (scs_len && !in_string) {
+            if (!strncmp(&row->render[i], scs, scs_len)) {
+                memset(&row->hl[i], HL_COMMENT, row->rsize - i);
+                break;
+            }
+        }
 
         if (E.syntax->flags & HL_HIGHLIGHT_STRINGS) {
             if (in_string) {
