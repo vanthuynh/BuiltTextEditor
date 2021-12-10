@@ -47,6 +47,7 @@ enum editorHighlight {
 struct editorSyntax {
     char *filetype;
     char **filematch; // array of strings that contains a pattern to match a filename against
+    char *singleline_comment_start;
     int flags;
 };
 
@@ -82,6 +83,7 @@ struct editorSyntax HLDB[] = { // HLDB means highlight database
     {
         "c",
         C_HL_extensions,
+        "//",
         HL_HIGHLIGHT_NUMBERS | HL_HIGHLIGHT_STRINGS
     },
 };
