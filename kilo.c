@@ -49,34 +49,34 @@ enum editorHighlight {
 /***  data ***/
 struct editorSyntax {
     char *filetype;
-    char **filematch; // array of strings that contains a pattern to match a filename against
+    char **filematch; //array of strings that contains a pattern to match a filename against
     char **keywords;
-    char *singleline_comment_start; // set singleelien_comment_start to NULL if don't want comment highlight
+    char *singleline_comment_start;
     char *multiline_comment_start;
     char *multiline_comment_end;
     int flags;
 };
 
 typedef struct erow {
-    int idx; // each erow knows its own index within the file
+    int idx; //each erow knows its own index within the file
     int size;
-    int rsize; // size of the contents of render
+    int rsize; //size of the contents of render
     char *chars;
-    char *render; // contain actual characters to draw on the screen for that row of text
-    unsigned char *hl; // highlight
+    char *render; //contain actual characters to draw on the screen for that row of text
+    unsigned char *hl; //highlight
     int hl_open_comment;
-} erow; // erow stands for "editor row"
+} erow; //erow stands for "editor row"
 
 struct editorConfig {
     int cx, cy; // keep track of the cursor's x and y position in the global editor state
     int rx;
     int rowoff; // keep track of what row of file the user is currently scrolled to
-    int coloff; // keep track of what column of file the user is currently scrolled to (horizontally)
+    int coloff; // keep track of what column of file the user is currently scrolled to
     int screenrows;
     int screencols;
     int numrows;
     erow *row; // make erow an array of erow structs -> store multiple lines
-    int dirty; // a text buffer is dirty if it has been modified since openning or saving the file
+    int dirty; // a text buffer is dirty if it has been modified since openning or saving
     char *filename; // store the file name to be displayed
     char statusmsg[80]; // store current message
     time_t statusmsg_time; // store a timestamp for the message
@@ -102,7 +102,7 @@ struct editorSyntax HLDB[] = { // HLDB means highlight database
         HL_HIGHLIGHT_NUMBERS | HL_HIGHLIGHT_STRINGS
     },
 };
-#define HLDB_ENTRIES (sizeof(HLDB) / sizeof(HLDB[0])) // HLDB_ENTRIES store length of HLDB array
+#define HLDB_ENTRIES (sizeof(HLDB) / sizeof(HLDB[0]))
 
 /*** prototypes ***/
 void editorSetStatusMessage(const char *fmt, ...);
@@ -113,7 +113,7 @@ char *editorPrompt(char *prompt, void (*callback)(char *, int));
 void die(const char *s) {
     write(STDOUT_FILENO, "\x1b[2J", 4);
     write(STDOUT_FILENO, "\x1b[H", 3);
-    perror(s);  // print descriptive message after looking for errno variable
+    perror(s);
     exit(1);
 }
 
@@ -278,7 +278,7 @@ void editorUpdateSyntax(erow *row) {
                     i += 2;
                     continue;
                 }
-                if (c == in_string) in_string = 0; // check if the current character is the closing quote
+                if (c == in_string) in_string = 0;
                 i++;
                 prev_sep = 1; // the closing quote is considered a separator
                 continue;
@@ -307,7 +307,8 @@ void editorUpdateSyntax(erow *row) {
                 int klen = strlen(keywords[j]);
                 int kw2 = keywords[j][klen - 1] == '|';
                 if (kw2) klen--;
-                if (!strncmp(&row->render[i], keywords[j], klen) && is_separator(row->render[i + klen])) {
+                if (!strncmp(&row->render[i], keywords[j], klen) 
+                        && is_separator(row->render[i + klen])) {
                     memset(&row->hl[i], kw2 ? HL_KEYWORD2 : HL_KEYWORD1, klen);
                     i += klen;
                     break;
@@ -322,8 +323,8 @@ void editorUpdateSyntax(erow *row) {
         i++;
     }
     int changed = (row->hl_open_comment != in_comment);
-    row->hl_open_comment = in_comment; // set the value of current row's hl_open_comment to whatever state in_comment
-    if (changed && row->idx + 1 < E.numrows) // only call editorUpdateSyntax() if hl_open_comment changed
+    row->hl_open_comment = in_comment;
+    if (changed && row->idx + 1 < E.numrows)
         editorUpdateSyntax(&E.row[row->idx + 1]);
 }
 
@@ -415,9 +416,9 @@ void editorInsertRow(int at, char *s, size_t len) {
 
     E.row = realloc(E.row, sizeof(erow) * (E.numrows + 1));
     memmove(&E.row[at + 1], &E.row[at], sizeof(erow) * (E.numrows - at));
-    for (int j = at + 1; j <= E.numrows; j++) E.row[j].idx++; // update the index of each row that was displaced
+    for (int j = at + 1; j <= E.numrows; j++) E.row[j].idx++;
 
-    E.row[at].idx = at; // initialize idx to the row's index in the file at the time it is inserted
+    E.row[at].idx = at; // initialize idx to the row's index in the file when it is inserted
 
     E.row[at].size = len;
     E.row[at].chars = malloc(len + 1);
@@ -443,13 +444,13 @@ void editorDelRow(int at) {
     if (at < 0 || at >= E.numrows) return;
     editorFreeRow(&E.row[at]);
     memmove(&E.row[at], &E.row[at + 1], sizeof(erow) * (E.numrows - at - 1));
-    for (int j = at; j < E.numrows - 1; j++) E.row[j].idx--; // update the index of each row that was displaced
+    for (int j = at; j < E.numrows - 1; j++) E.row[j].idx--;
     E.numrows--;
     E.dirty++;
 }
 
 void editorRowInsertChar(erow *row, int at, int c) {
-    if (at < 0 || at > row->size) at = row->size; // validate at - index that will be inserted a character
+    if (at < 0 || at > row->size) at = row->size;
     row->chars = realloc(row->chars, row->size + 2);
     memmove(&row->chars[at + 1], &row->chars[at], row->size - at + 1); // memove() = memcpy()
     row->size++;
@@ -477,8 +478,8 @@ void editorRowDelChar(erow *row, int at) {
 
 
 /*** editor operations ***/
-void editorInsertChar(int c) { // this function doesn't have to worry about where the cursor is
-    if (E.cy == E.numrows) { // this means the cursor is on the tilde line after the end of the file
+void editorInsertChar(int c) {
+    if (E.cy == E.numrows) {
         editorInsertRow(E.numrows, "", 0);
     }
     editorRowInsertChar(&E.row[E.cy], E.cx, c);
@@ -542,7 +543,7 @@ void editorOpen(char *filename) {
     FILE *fp = fopen(filename, "r");
     if (!fp) die("fopen");
 
-    char *line = NULL; // pass the null pointer 
+    char *line = NULL;
     size_t linecap = 0; // linecap to inform how much memory it allocated
     ssize_t linelen;
     linelen = getline(&line, &linecap, fp);
@@ -568,7 +569,7 @@ void editorSave() {
         editorSelectSyntaxHighlight();
     }
     int len;
-    char *buf = editorRowsToString(&len); // write the string returned by editorRowsToString() to disk
+    char *buf = editorRowsToString(&len);
     int fd = open(E.filename, O_RDWR | O_CREAT, 0644);
     if (fd != -1) {
         if (ftruncate(fd, len) != -1) { // ftruncate returns -1 on error
@@ -698,7 +699,7 @@ void editorScroll() {
 void editorDrawRows(struct abuf *ab) {
     int y;
     for (y = 0; y < E.screenrows; y++) {
-        int filerow = y + E.rowoff; // get the row of the file that we want to display at each y position
+        int filerow = y + E.rowoff;
         if (filerow >= E.numrows) {
             if (E.numrows == 0 && y == E.screenrows / 3) {
                 char welcome[80];
@@ -724,11 +725,11 @@ void editorDrawRows(struct abuf *ab) {
             int current_color = -1;
             int j;
             for (j = 0; j < len; j++) {
-                if (iscntrl(c[j])) { // check if the current character is a control character
-                    char sym = (c[j] <= 26) ? '@' + c[j] : '?'; // translate into printable character like @ or ?
-                    abAppend(ab, "\x1b[7m", 4); // switch to inverted colors
+                if (iscntrl(c[j])) {
+                    char sym = (c[j] <= 26) ? '@' + c[j] : '?';
+                    abAppend(ab, "\x1b[7m", 4);
                     abAppend(ab, &sym, 1);      
-                    abAppend(ab, "\x1b[m", 3);  // turn off inverted colors
+                    abAppend(ab, "\x1b[m", 3);
                     if (current_color != -1) {
                         char buf[16];
                         int clen = snprintf(buf, sizeof(buf), "\x1b[%dm", current_color);
@@ -777,7 +778,7 @@ void editorDrawStatusBar(struct abuf *ab) {
             len++;
         }
     }
-    abAppend(ab, "\x1b[m", 3); // m command cause the text printed after it to be printed with various possible attributes
+    abAppend(ab, "\x1b[m", 3);
     abAppend(ab, "\r\n", 2);
 }
 
@@ -790,7 +791,7 @@ void editorDrawMessageBar(struct abuf *ab) {
 }
 
 void editorRefreshScreen() {
-    editorScroll(); // call for adjusting rows inside visible window before refresh the screen
+    editorScroll();
 
     struct abuf ab = ABUF_INIT; // initialize a new abuf
 
@@ -848,7 +849,7 @@ char *editorPrompt(char *prompt, void (*callback)(char *, int)) {
                 buf = realloc(buf, bufsize);
             }
             buf[buflen++] = c;
-            buf[buflen] = '\0'; // buf ends with a \0 character so that editorPrompt() know where the string ends
+            buf[buflen] = '\0';
         }
         if (callback) callback(buf, c);
     }
