@@ -52,6 +52,8 @@ struct editorSyntax {
     char **filematch; // array of strings that contains a pattern to match a filename against
     char **keywords;
     char *singleline_comment_start; // set singleelien_comment_start to NULL if don't want comment highlight
+    char *multiline_comment_start;
+    char *multiline_comment_end;
     int flags;
 };
 
@@ -94,7 +96,7 @@ struct editorSyntax HLDB[] = { // HLDB means highlight database
         "c",
         C_HL_extensions,
         C_HL_keywords,
-        "//",
+        "//", "/*", "*/",
         HL_HIGHLIGHT_NUMBERS | HL_HIGHLIGHT_STRINGS
     },
 };
