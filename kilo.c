@@ -58,11 +58,13 @@ struct editorSyntax {
 };
 
 typedef struct erow {
+    int idx; // each erow knows its own index within the file
     int size;
     int rsize; // size of the contents of render
     char *chars;
     char *render; // contain actual characters to draw on the screen for that row of text
     unsigned char *hl; // highlight
+    int hl_open_comment;
 } erow; // erow stands for "editor row"
 
 struct editorConfig {
@@ -410,6 +412,8 @@ void editorInsertRow(int at, char *s, size_t len) {
     E.row = realloc(E.row, sizeof(erow) * (E.numrows + 1));
     memmove(&E.row[at + 1], &E.row[at], sizeof(erow) * (E.numrows - at));
 
+    E.row[at].idx = at; // initialize idx to the row's index in the file at the time it is inserted
+
     E.row[at].size = len;
     E.row[at].chars = malloc(len + 1);
     memcpy(E.row[at].chars, s, len);
@@ -418,6 +422,7 @@ void editorInsertRow(int at, char *s, size_t len) {
     E.row[at].rsize = 0;
     E.row[at].render = NULL;
     E.row[at].hl = NULL;
+    E.row[at].hl_open_comment = 0;
     editorUpdateRow(&E.row[at]);
 
     E.numrows++;
