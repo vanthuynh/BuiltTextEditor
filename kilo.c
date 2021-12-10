@@ -235,7 +235,7 @@ void editorUpdateSyntax(erow *row) {
 
     int prev_sep = 1;
     int in_string = 0; // in_string keeps track whether we are currently inside a string
-    int in_comment = 0;
+    int in_comment = (row->idx > 0 && E.row[row->idx - 1].hl_open_comment);
 
     int i = 0;
     while (i < row->rsize) {
@@ -321,12 +321,16 @@ void editorUpdateSyntax(erow *row) {
         prev_sep = is_separator(c);
         i++;
     }
+    int changed = (row->hl_open_comment != in_comment);
+    row->hl_open_comment = in_comment; // set the value of current row's hl_open_comment to whatever state in_comment
+    if (changed && row->idx + 1 < E.numrows) // only call editorUpdateSyntax() if hl_open_comment changed
+        editorUpdateSyntax(&E.row[row->idx + 1]);
 }
 
 int editorSyntaxToColor(int hl) {
     switch (hl) {
         case HL_COMMENT:
-        case HL_COMMENT: return 36; // cyan
+        case HL_MLCOMMENT: return 36; // cyan
         case HL_KEYWORD1: return 33; // yellow
         case HL_KEYWORD2: return 32; // green
         case HL_STRING: return 35; // magenta
